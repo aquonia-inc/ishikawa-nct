@@ -13,7 +13,7 @@ M5Canvas canvas(&display);
 
 // Thingsboard settings
 #include <ThingsBoard.h>
-#define TOKEN               "NITDEVICE00" // "ESP32TEST1CORE2"
+#define TOKEN               "NITDEVICE05" // "ESP32TEST1CORE2"
 #define THINGSBOARD_SERVER  "thingsboard.cloud"   // ThingsBoard server
 WiFiClient espClient;   // using ESP32 for MQTT client
 ThingsBoard tb(espClient);  // init instance
@@ -166,7 +166,7 @@ void loop(void) {
   if (lastState == HIGH && currentState == LOW) {
     Serial.println("The button is pressed");
     tb.sendTelemetryFloat("TDS", tdsValue); 
-    //tb.sendTelemetryFloat("pH", phValue); 
+    tb.sendTelemetryFloat("pH", phValue); 
     tb.sendTelemetryFloat("Temperature", tmp);
     tb.sendTelemetryFloat("Humidity", hum);
     tb.sendTelemetryFloat("AirPressure", pressure/100);
