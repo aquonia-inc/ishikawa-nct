@@ -60,8 +60,8 @@ TinyGPSPlus gps;
 HardwareSerial ss(2);
 #define RXD2 13
 #define TXD2 14
-float lat=35.170915;
-float lng=136.881537;
+float lat=36.66213044;
+float lng=136.7382814;
 
 // Water Temperature settings
 #include <OneWire.h>
@@ -112,7 +112,8 @@ void loop(void) {
 
   //Calcuration
   //Convert voltage value to TDS value and pH value
-  phValue=2.405*phVoltage+3.9166;
+  // phValue=2.405*phVoltage+3.9166; // pro v1
+  phValue=0.0018*MM.ADCread(0)+4.166;  // normal v1
   tdsValue=(133.42/tdsVoltage*tdsVoltage*tdsVoltage - 255.86*tdsVoltage*tdsVoltage + 857.39*tdsVoltage)*0.5;
   
   sht30.UpdateData();
@@ -128,10 +129,6 @@ void loop(void) {
   waterTemp = sensors.getTempCByIndex(0);
 
   currentState = digitalRead(GROVE_C_1);
-    
-  Serial.printf("temp: %4.1f'C\r\n", tmp);
-  Serial.printf("humid:%4.1f%%\r\n", hum);
-  Serial.printf("press:%4.0fhPa\r\n", pressure / 100);
   
   // connect to Wi-Fi
   if (WiFi.status() == WL_IDLE_STATUS) {
@@ -165,76 +162,94 @@ void loop(void) {
   }
   if (lastState == HIGH && currentState == LOW) {
     Serial.println("The button is pressed");
-    tb.sendTelemetryFloat("TDS", tdsValue); 
+    tb.sendTelemetryFloat("TDS", tdsValue);
     tb.sendTelemetryFloat("pH", phValue); 
     tb.sendTelemetryFloat("Temperature", tmp);
     tb.sendTelemetryFloat("Humidity", hum);
     tb.sendTelemetryFloat("AirPressure", pressure/100);
     tb.sendTelemetryFloat("WaterTemperature", waterTemp); 
     tb.sendTelemetryFloat("Latitude", lat);
-    tb.sendTelemetryFloat("Longitude", lng);
-    
-    canvas.pushSprite(0, 5);
-    
-    // TDS
-    canvas.setCursor(0, 0); 
-    canvas.print("TDS");
-    canvas.setCursor(15, 10); 
-    canvas.print(String(int(round(tdsValue))));
-    canvas.print("ppm");
-    
-    // pH
-    canvas.setCursor(0, 20); 
-    canvas.print("pH");
-    canvas.setCursor(15, 30);
-    canvas.print(String(phValue));
-
-    // Temperature
-    canvas.setCursor(0, 40);
-    canvas.print("Temp");    
-    canvas.setCursor(15, 50);
-    canvas.print(String(int(round(tmp))));
-    canvas.print("C");
-    
-    // Humidity
-    canvas.setCursor(0, 60); 
-    canvas.print("Humidity");
-    canvas.setCursor(15, 70);    
-    canvas.print(String(int(round(hum))));
-    canvas.print("%");
-
-    // Water Temperature
-    canvas.setCursor(0, 80);
-    canvas.print("WaterTemp");
-    canvas.setCursor(15, 90);
-    canvas.print(String(int(round(waterTemp))));
-    canvas.print("C");
-    
-    // Air Pressure
-    canvas.setCursor(0, 100); 
-    canvas.print("Air");
-    canvas.setCursor(15, 110);
-    canvas.print(String(int(round(pressure/100))));
-    canvas.print("hPa");
-    
+    tb.sendTelemetryFloat("Longitude", lng); 
   }
   else if (lastState == LOW && currentState == HIGH){
     Serial.println("The button is released");
   }
 
-  // save the the last state
-  lastState = currentState;
+  
+  canvas.pushSprite(0, 5);
+    
+  // TDS
+  canvas.setCursor(0, 0); 
+  canvas.print("TDS");
+  canvas.setCursor(15, 10); 
+  canvas.print(String(int(round(tdsValue))));
+  canvas.print("ppm ");
+  
+  // pH
+  canvas.setCursor(0, 20); 
+  canvas.print("pH");
+  canvas.setCursor(15, 30);
+  canvas.print(String(phValue));
+
+  // Temperature
+  canvas.setCursor(0, 40);
+  canvas.print("Temp");    
+  canvas.setCursor(15, 50);
+  canvas.print(String(int(round(tmp))));
+  canvas.print("C");
+  
+  // Humidity
+  // canvas.setCursor(0, 60); 
+  // canvas.print("Humidity");
+  // canvas.setCursor(15, 70);    
+  // canvas.print(String(int(round(hum))));
+  // canvas.print("%");
+
+  // Water Temperature
+  canvas.setCursor(0, 60);
+  canvas.print("WaterTemp");
+  canvas.setCursor(15, 70);
+  canvas.print(String(int(round(waterTemp))));
+  canvas.print("C");
+  
+  // Air Pressure
+  canvas.setCursor(0, 80); 
+  canvas.print("Air");
+  canvas.setCursor(15, 90);
+  canvas.print(String(int(round(pressure/100))));
+  canvas.print("hPa");
+
+  // Upload
+  canvas.setCursor(0, 100); 
+  canvas.print("Upload");
+  canvas.setCursor(15, 110);
+  if(lastState == HIGH && currentState == LOW){
+    canvas.print("Done!!   ");
+  }else{
+    canvas.print("         ");
+  }
 
   // event loop for MQTT client
   tb.loop(); 
 
-  //Serial
-  Serial.print("tdsVoltage : "); 
-  Serial.println(tdsVoltage);
-  Serial.print(" TDS Value : ");
+  // Serial
+  Serial.print("TDS Value : ");
   Serial.print(tdsValue);
   Serial.println(" ppm ");
+  Serial.print("pH Value ");
+  Serial.println(phValue);
+  Serial.print("Water temp: ");
+  Serial.println(waterTemp);
+  Serial.printf("temp: %4.1f'C\r\n", tmp);
+  Serial.printf("humid:%4.1f%%\r\n", hum);
+  Serial.printf("press:%4.0fhPa\r\n", pressure / 100);
+  Serial.printf("Latitude:%4.2f%\r\n", lat);
+  Serial.printf("Longitude:%4.2f\r\n", lng);
   Serial.println("*****************");
+  // Serial.println(currentState);
+  // Serial.println(lastState);
+  // save the the last state
+  lastState = currentState;
 
   delay(500);
 }
