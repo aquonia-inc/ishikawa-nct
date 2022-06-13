@@ -3,8 +3,8 @@
 
 // Wifi settings
 #include <WiFi.h>
-const char ssid[] = "***";
-const char pass[] = "***";
+const char ssid[] = "****";
+const char pass[] = "****";
  
 // M5Unit OLED settings
 #include <M5UnitOLED.h>
@@ -13,7 +13,7 @@ M5Canvas canvas(&display);
 
 // Thingsboard settings
 #include <ThingsBoard.h>
-#define TOKEN               "NITDEVICE05" // "ESP32TEST1CORE2"
+#define TOKEN               "NITDEVICE00" // "ESP32TEST1CORE2"
 #define THINGSBOARD_SERVER  "thingsboard.cloud"   // ThingsBoard server
 WiFiClient espClient;   // using ESP32 for MQTT client
 ThingsBoard tb(espClient);  // init instance
@@ -112,8 +112,8 @@ void loop(void) {
 
   //Calcuration
   //Convert voltage value to TDS value and pH value
-  // phValue=2.405*phVoltage+3.9166; // pro v1
-  phValue=0.0018*MM.ADCread(0)+4.166;  // normal v1
+  phValue=2.405*phVoltage+3.9166; // pro v1
+  // phValue=0.0018*MM.ADCread(0)+4.166;  // normal v1
   tdsValue=(133.42/tdsVoltage*tdsVoltage*tdsVoltage - 255.86*tdsVoltage*tdsVoltage + 857.39*tdsVoltage)*0.5;
   
   sht30.UpdateData();
@@ -177,24 +177,24 @@ void loop(void) {
 
   
   canvas.pushSprite(0, 5);
-    
+  
   // TDS
   canvas.setCursor(0, 0); 
   canvas.print("TDS");
-  canvas.setCursor(15, 10); 
+  canvas.setCursor(25, 0); 
   canvas.print(String(int(round(tdsValue))));
   canvas.print("ppm ");
   
   // pH
-  canvas.setCursor(0, 20); 
+  canvas.setCursor(0, 12); 
   canvas.print("pH");
-  canvas.setCursor(15, 30);
+  canvas.setCursor(35, 12);
   canvas.print(String(phValue));
 
   // Temperature
-  canvas.setCursor(0, 40);
+  canvas.setCursor(0, 24);
   canvas.print("Temp");    
-  canvas.setCursor(15, 50);
+  canvas.setCursor(40, 24);
   canvas.print(String(int(round(tmp))));
   canvas.print("C");
   
@@ -206,23 +206,40 @@ void loop(void) {
   // canvas.print("%");
 
   // Water Temperature
-  canvas.setCursor(0, 60);
-  canvas.print("WaterTemp");
-  canvas.setCursor(15, 70);
+  canvas.setCursor(0, 36);
+  canvas.print("WTemp");
+  canvas.setCursor(40, 36);
   canvas.print(String(int(round(waterTemp))));
   canvas.print("C");
+
+  // Lat
+  canvas.setCursor(0, 48);
+  canvas.print("Lat");
+  canvas.setCursor(27, 48);
+  canvas.print(String(round(lat),2));
+  // Lng
+  canvas.setCursor(0, 60);
+  canvas.print("Lng");
+  canvas.setCursor(27, 60);
+  canvas.print(String(round(lng),2));
   
   // Air Pressure
-  canvas.setCursor(0, 80); 
+  canvas.setCursor(0, 72); 
   canvas.print("Air");
-  canvas.setCursor(15, 90);
+  canvas.setCursor(15, 84);
   canvas.print(String(int(round(pressure/100))));
   canvas.print("hPa");
+  
+  // Wifi
+  // canvas.setCursor(0,78); 
+  // canvas.print("Wifi");
+  // canvas.setCursor(25, 90); 
+  // canvas.print(String(wifiStatus));
 
   // Upload
-  canvas.setCursor(0, 100); 
+  canvas.setCursor(0, 102); 
   canvas.print("Upload");
-  canvas.setCursor(15, 110);
+  canvas.setCursor(15, 114);
   if(lastState == HIGH && currentState == LOW){
     canvas.print("Done!!   ");
   }else{
